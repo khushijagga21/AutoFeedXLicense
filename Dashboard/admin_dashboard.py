@@ -2,10 +2,20 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 import os
 import json
+import sys
 
-# Path to credentials.json
-credentials_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'YouTube-Viewer', 'credentials.json'))
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller .exe """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.abspath(".")
 
+    return os.path.join(base_path, relative_path)
+
+# Proper path to credentials.json
+credentials_path = resource_path("credentials.json")
 
 def open_dashboard():
     root = tk.Tk()
@@ -32,7 +42,7 @@ def open_dashboard():
     def load_users():
         tree.delete(*tree.get_children())
         if not os.path.exists(credentials_path):
-            messagebox.showerror("Missing File", "credentials.json not found.")
+            messagebox.showerror("Missing File", f"credentials.json not found at\n{credentials_path}")
             return
 
         with open(credentials_path, "r") as f:
@@ -44,7 +54,7 @@ def open_dashboard():
 
         for username, info in data.items():
             company = info.get("company", "N/A")
-            access = info.get("access", "allowed")  # default to allowed if missing
+            access = info.get("access", "allowed")
             tree.insert("", tk.END, iid=username, values=(username, company, access, "Action"))
 
     def toggle_access():
